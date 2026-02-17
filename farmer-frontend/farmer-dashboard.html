@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Farmer Dashboard</title>
+
+  <link rel="stylesheet" href="farmer.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body>
+
+  <!-- ✅ Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <i class="fa-solid fa-seedling"></i>
+      <span>ROOTS</span>
+    </div>
+
+    <nav class="menu">
+      <a href="farmer-dashboard.html">Dashboard</a>
+      <a href="inventory.html">Inventory</a>
+      <a href="farmer-orders.html">Orders</a>
+      <a href="farmer-reviews.html">Ratings & Reviews</a>
+      <a href="farmer-profile.html">Profile</a>
+
+    </nav>
+
+    <button class="logout-btn" onclick="logout()">
+      <i class="fa-solid fa-right-from-bracket"></i> Logout
+    </button>
+  </aside>
+
+  <!-- ✅ Main -->
+  <main class="main">
+
+    <!-- ✅ Topbar -->
+    <header class="topbar">
+      <div class="breadcrumb">
+        <h2>Dashboard</h2>
+        <p>FARMER / Dashboard</p>
+      </div>
+
+      <div class="top-actions">
+        <span id="welcomeText">Welcome, Farmer</span>
+        <button class="top-btn"><i class="fa-solid fa-wallet"></i> Wallet</button>
+        <button class="top-btn"><i class="fa-regular fa-bell"></i> Notifications</button>
+      </div>
+    </header>
+
+    <!-- ✅ Title -->
+    <section class="page-title">
+      <h1>Farmer Dashboard</h1>
+      <p>Manage your products and track orders</p>
+    </section>
+
+    <!-- ✅ Summary Cards -->
+    <section class="stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;">
+      <div class="content-card" style="display:flex;gap:14px;align-items:center;">
+        <div
+          style="width:42px;height:42px;border-radius:12px;background:#eafaf1;display:flex;align-items:center;justify-content:center;color:#0f7d44;">
+          <i class="fa-solid fa-box"></i>
+        </div>
+        <div>
+          <h3 id="totalProducts" style="font-size:22px;font-weight:800;">0</h3>
+          <p style="font-size:12px;color:#6b7280;">TOTAL PRODUCTS</p>
+        </div>
+      </div>
+
+      <div class="content-card" style="display:flex;gap:14px;align-items:center;">
+        <div
+          style="width:42px;height:42px;border-radius:12px;background:#eef2ff;display:flex;align-items:center;justify-content:center;color:#4f46e5;">
+          <i class="fa-solid fa-bag-shopping"></i>
+        </div>
+        <div>
+          <h3 id="totalOrders" style="font-size:22px;font-weight:800;">0</h3>
+          <p style="font-size:12px;color:#6b7280;">TOTAL ORDERS</p>
+        </div>
+      </div>
+
+      <div class="content-card" style="display:flex;gap:14px;align-items:center;">
+        <div
+          style="width:42px;height:42px;border-radius:12px;background:#fef9c3;display:flex;align-items:center;justify-content:center;color:#ca8a04;">
+          <i class="fa-solid fa-clock"></i>
+        </div>
+        <div class="content-card" style="cursor:pointer;" onclick="goTo('add-product.html')">
+          <div style="display:flex;gap:12px;align-items:center;">
+            <div
+              style="width:44px;height:44px;border-radius:12px;background:#eafaf1;display:flex;align-items:center;justify-content:center;color:#0f7d44;">
+              <i class="fa-solid fa-plus"></i>
+            </div>
+            <div>
+              <h3 style="font-size:16px;font-weight:800;">Add New Product</h3>
+              <p style="font-size:13px;color:#6b7280;margin-top:4px;">
+                Add fresh product for retailers
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 id="pendingOrders" style="font-size:22px;font-weight:800;">0</h3>
+          <p style="font-size:12px;color:#6b7280;">PENDING ORDERS</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ✅ Quick Actions -->
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:18px;">
+      <div class="content-card" style="cursor:pointer;" onclick="goTo('inventory.html')">
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div
+            style="width:44px;height:44px;border-radius:12px;background:#eafaf1;display:flex;align-items:center;justify-content:center;color:#0f7d44;">
+            <i class="fa-solid fa-plus"></i>
+          </div>
+          <div>
+            <h3 style="font-size:16px;font-weight:800;">Manage Inventory</h3>
+            <p style="font-size:13px;color:#6b7280;margin-top:4px;">
+              Edit or update your product details
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-card" style="cursor:pointer;" onclick="goTo('farmer-orders.html')">
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div
+            style="width:44px;height:44px;border-radius:12px;background:#eef2ff;display:flex;align-items:center;justify-content:center;color:#4f46e5;">
+            <i class="fa-solid fa-receipt"></i>
+          </div>
+          <div>
+            <h3 style="font-size:16px;font-weight:800;">View Orders</h3>
+            <p style="font-size:13px;color:#6b7280;margin-top:4px;">
+              See all orders from retailers
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-card" style="cursor:pointer;" onclick="goTo('farmer-profile.html')">
+        <div style="display:flex;gap:12px;align-items:center;">
+          <div
+            style="width:44px;height:44px;border-radius:12px;background:#fef2f2;display:flex;align-items:center;justify-content:center;color:#dc2626;">
+            <i class="fa-solid fa-user"></i>
+          </div>
+          <div>
+            <h3 style="font-size:16px;font-weight:800;">My Profile</h3>
+            <p style="font-size:13px;color:#6b7280;margin-top:4px;">
+              View and update your details
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /* ================= AUTH ================= */
+    const userStr = localStorage.getItem("user");
+
+
+    if (!userStr) {
+      alert("Please login");
+      window.location.href = "login.html";
+    }
+
+    const user = JSON.parse(userStr);
+
+    if (!String(user.role || "").toUpperCase().includes("FARMER")) {
+      alert("Farmer access only");
+      window.location.href = "login.html";
+    }
+
+    document.getElementById("welcomeText").innerText = "Welcome, Farmer";
+
+    function goTo(page) {
+      window.location.href = page;
+    }
+
+    function logout() {
+      localStorage.removeItem("user");
+      window.location.href = "login.html";
+    }
+
+    /* ================= LOAD STATS ================= */
+    async function loadStats() {
+      // ✅ Total Products
+      try {
+        const resProducts = await fetch(`http://localhost:8080/api/farmer/${user.id}/products`);
+        const products = await resProducts.json();
+        document.getElementById("totalProducts").innerText = products.length || 0;
+      } catch (err) {
+        console.error("Products error:", err);
+        document.getElementById("totalProducts").innerText = 0;
+      }
+
+      // ✅ Load stats from Analytics API
+      try {
+        const res = await fetch(`http://localhost:8080/api/analytics/farmer/${user.id}`);
+        const data = await res.json();
+
+        // data has: totalRevenue, totalItemsSold, totalOrders, productSales (map)
+
+        // We have IDs: totalProducts?, totalOrders, pendingOrders?
+        // Analytics API gives "totalOrders" which is count of distinct orders.
+        // It does NOT give totalProducts count. We still need product fetch.
+
+        document.getElementById("totalOrders").innerText = data.totalOrders;
+        document.getElementById("pendingOrders").innerText = data.totalOrders; // Placeholder as status not split in basic analytics
+
+        // Revenue? We don't have a card for it in the HTML shown.
+        // Let's create one or log it.
+        console.log("Revenue: ", data.totalRevenue);
+
+      } catch (err) {
+        console.error("Analytics error:", err);
+      }
+
+      // ✅ Total Products (Legacy fetch)
+      try {
+        const resProducts = await fetch(`http://localhost:8080/api/products/farmer/${user.id}`);
+        const products = await resProducts.json();
+        document.getElementById("totalProducts").innerText = products.length || 0;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+
+    /* ================= NOTIFICATIONS ================= */
+    const notifBtn = document.querySelector(".top-btn i.fa-bell").parentNode;
+
+    // Create Modal Element
+    const nModal = document.createElement("div");
+    nModal.id = "notifModal";
+    nModal.style.cssText = "display:none; position:fixed; top:60px; right:20px; width:300px; background:white; border:1px solid #ddd; box-shadow:0 4px 12px rgba(0,0,0,0.1); border-radius:8px; z-index:1000; max-height:400px; overflow-y:auto;";
+    nModal.innerHTML = `<div style="padding:10px; border-bottom:1px solid #eee; font-weight:bold;">Notifications</div><ul id="notifList" style="list-style:none; padding:0; margin:0;"></ul>`;
+    document.body.appendChild(nModal);
+
+    notifBtn.onclick = function (e) {
+      e.stopPropagation();
+      const m = document.getElementById("notifModal");
+      if (m.style.display === "none") {
+        fetchNotifications();
+        m.style.display = "block";
+      } else {
+        m.style.display = "none";
+      }
+    };
+
+    // Close on click outside
+    document.addEventListener("click", function (e) {
+      const m = document.getElementById("notifModal");
+      if (!notifBtn.contains(e.target) && !m.contains(e.target)) {
+        m.style.display = "none";
+      }
+    });
+
+    async function fetchNotifications() {
+      const list = document.getElementById("notifList");
+      list.innerHTML = "<li style='padding:10px;'>Loading...</li>";
+
+      try {
+        const res = await fetch(`http://localhost:8080/api/notifications/${user.id}?role=FARMER`);
+        const data = await res.json();
+
+        list.innerHTML = "";
+        if (!data || data.length === 0) {
+          list.innerHTML = "<li style='padding:10px; color:#777;'>No new notifications</li>";
+          updateNotifBadge(0);
+          return;
+        }
+
+        updateNotifBadge(data.length);
+
+        data.forEach(n => {
+          const li = document.createElement("li");
+          li.style.padding = "10px";
+          li.style.borderBottom = "1px solid #f0f0f0";
+          li.style.fontSize = "13px";
+          li.style.cursor = "pointer";
+          li.onclick = () => markRead(n.id);
+          li.innerHTML = `<div>${n.message}</div><div style='font-size:10px; color:#aaa; margin-top:4px;'>${new Date(n.createdAt).toLocaleString()}</div>`;
+          list.appendChild(li);
+        });
+
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function updateNotifBadge(count) {
+      let badge = document.getElementById("farmerNotifBadge");
+      if (count > 0) {
+        if (!badge) {
+          badge = document.createElement("span");
+          badge.id = "farmerNotifBadge";
+          badge.style.cssText = "position:absolute; top:2px; right:2px; width:10px; height:10px; background:red; border-radius:50%; border:2px solid white;";
+          notifBtn.style.position = "relative";
+          notifBtn.appendChild(badge);
+        }
+      } else if (badge) {
+        badge.remove();
+      }
+    }
+
+    async function markRead(id) {
+      await fetch(`http://localhost:8080/api/notifications/${id}/read`, { method: 'PUT' });
+      fetchNotifications();
+    }
+
+    setInterval(fetchNotifications, 30000);
+    fetchNotifications();
+
+    // Also periodic check for badge? (Skip for now)
+
+    loadStats();
+  </script>
+  <script src="notifications.js"></script>
+</body>
+
+</html>

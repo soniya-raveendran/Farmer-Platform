@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory | Farmer</title>
+
+  <link rel="stylesheet" href="./farmer.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body>
+
+  <!-- ✅ Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <i class="fa-solid fa-seedling"></i>
+      <span>ROOTS</span>
+    </div>
+
+    <nav class="menu">
+      <a href="farmer-dashboard.html"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="add-product.html"><i class="fa-solid fa-plus"></i> Add Product</a>
+      <a href="farmer-orders.html"><i class="fa-solid fa-receipt"></i> Orders</a>
+      <a href="inventory.html" class="active"><i class="fa-solid fa-warehouse"></i> Inventory</a>
+      <a href="farmer-reviews.html"><i class="fa-solid fa-star"></i> Ratings & Reviews</a>
+      <a href="farmer-profile.html"><i class="fa-solid fa-user"></i> Profile</a>
+      <a href="#"><i class="fa-solid fa-gear"></i> Settings</a>
+    </nav>
+
+    <button class="logout-btn" onclick="logout()">
+      <i class="fa-solid fa-right-from-bracket"></i> Logout
+    </button>
+  </aside>
+
+  <!-- ✅ Main -->
+  <main class="main">
+
+    <!-- ✅ Topbar -->
+    <header class="topbar">
+      <div class="breadcrumb">
+        <h2>Inventory</h2>
+        <p>FARMER / Inventory</p>
+      </div>
+
+      <div class="top-actions">
+        <span id="welcomeText">Welcome, Farmer</span>
+        <button class="top-btn"><i class="fa-solid fa-wallet"></i> Wallet</button>
+        <button class="top-btn"><i class="fa-regular fa-bell"></i> Notifications</button>
+      </div>
+    </header>
+
+    <!-- ✅ Title -->
+    <section class="page-title">
+      <h1>Inventory Management</h1>
+      <p>Edit and manage your product details</p>
+    </section>
+
+    <!-- ✅ Inventory Grid -->
+    <section id="inventoryGrid" class="inventory-grid"></section>
+
+  </main>
+  <!-- ✅ Edit Popup Modal -->
+  <div id="editModal" class="modal hidden">
+    <div class="modal-box">
+
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-pen"></i> Edit Product</h2>
+        <button class="close-btn" onclick="closeEdit()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <label>Product Name</label>
+        <input type="text" id="editName" placeholder="Enter product name" />
+
+        <label>Price (₹/kg)</label>
+        <input type="number" id="editPrice" placeholder="Enter price" />
+
+        <label>Quantity (kg)</label>
+        <input type="number" id="editQty" placeholder="Enter quantity" />
+
+        <div class="modal-actions">
+          <button class="cancel-btn" onclick="closeEdit()">Cancel</button>
+          <button class="save-btn" onclick="saveEdit()">
+            <i class="fa-solid fa-check"></i> Save Changes
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <!-- ✅ Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script>
+    let selectedProductId = null;
+
+    function logout() {
+      localStorage.removeItem("user");
+      window.location.href = "login.html";
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.innerText = message;
+      toast.classList.remove("hidden");
+
+      setTimeout(() => {
+        toast.classList.add("hidden");
+      }, 2500);
+    }
+
+    function getImageUrl(p) {
+      return p.imageUrl
+        ? (p.imageUrl.startsWith("http")
+          ? p.imageUrl
+          : p.imageUrl.startsWith("uploads")
+            ? `http://localhost:8080/${p.imageUrl}`
+            : `http://localhost:8080/uploads/${p.imageUrl}`)
+        : "https://placehold.co/400x400?text=ROOTS";
+    }
+
+    function openEdit(product) {
+      selectedProductId = product.id;
+      document.getElementById("editName").value = product.name;
+      document.getElementById("editPrice").value = product.price;
+      document.getElementById("editQty").value = product.quantity;
+
+      document.getElementById("editModal").classList.remove("hidden");
+    }
+
+    function closeEdit() {
+      document.getElementById("editModal").classList.add("hidden");
+      selectedProductId = null;
+    }
+
+    async function saveEdit() {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user) {
+        alert("Login expired. Please login again!");
+        return;
+      }
+
+      if (!selectedProductId) {
+        showToast("❌ Product id missing!");
+        return;
+      }
+
+      const updated = {
+        name: document.getElementById("editName").value.trim(),
+        price: Number(document.getElementById("editPrice").value),
+        quantity: Number(document.getElementById("editQty").value)
+      };
+
+      if (!updated.name || !updated.price || !updated.quantity) {
+        showToast("❌ Fill all fields!");
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://localhost:8080/api/products/update/${selectedProductId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updated)
+        });
+
+        if (res.ok) {
+          closeEdit();
+          await loadInventory();
+          showToast("✅ Product updated successfully!");
+        } else {
+          showToast("❌ Update failed!");
+        }
+      } catch (err) {
+        console.error(err);
+        showToast("❌ Server error while updating!");
+      }
+    }
+    let allProducts = [];
+
+    function openEditById(id) {
+      const product = allProducts.find(p => p.id === id);
+      if (!product) {
+        showToast("❌ Product not found!");
+        return;
+      }
+      openEdit(product);
+    }
+
+
+    async function loadInventory() {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user) {
+        alert("Please login again!");
+        return;
+      }
+
+      document.getElementById("welcomeText").innerText = `Welcome, Farmer`;
+
+      const farmerId = user.id;
+      const grid = document.getElementById("inventoryGrid");
+      grid.innerHTML = "<p>Loading products...</p>";
+
+      try {
+        const res = await fetch(`http://localhost:8080/api/farmer/${farmerId}/products`);
+        const products = await res.json();
+        allProducts = products;
+
+
+        if (!products || products.length === 0) {
+          grid.innerHTML = "<p>No products available in your inventory.</p>";
+          return;
+        }
+
+        grid.innerHTML = "";
+
+        products.forEach(p => {
+          const imageUrl = getImageUrl(p);
+
+          grid.innerHTML += `
+            <div class="inventory-card">
+              <img src="${imageUrl}" alt="product" class="inventory-img"/>
+
+              <div class="inventory-body">
+                <h3>${p.name}</h3>
+
+                <span class="badge">${p.category || "Product"}</span>
+
+                <p class="desc">
+                  ${p.description || "Fresh product directly from farm."}
+                </p>
+
+                <div class="meta">
+                  <div>
+                    <small>PRICE</small>
+                    <strong>₹${p.price} / kg</strong>
+                  </div>
+
+                  <div style="text-align:right;">
+                    <small>QUANTITY</small>
+                    <strong>${p.quantity} kg</strong>
+                  </div>
+                </div>
+
+               <button class="edit-btn" onclick="openEditById(${p.id})">
+  <i class="fa-solid fa-pen"></i> Edit Product
+</button>
+
+              </div>
+            </div>
+          `;
+        });
+
+      } catch (err) {
+        console.error(err);
+        grid.innerHTML = "<p>❌ Failed to load inventory.</p>";
+      }
+    }
+
+    loadInventory();
+  </script>
+
+</body>
+
+</html>

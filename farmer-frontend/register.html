@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>User Registration</title>
+    <link rel="stylesheet" href="./reg.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="card">
+            <h2>Create Account</h2>
+            <p class="subtitle">Join the Farmer–Retailer Platform</p>
+
+            <input id="name" type="text" placeholder="Full Name">
+            <div style="display: flex; gap: 10px;">
+                <input id="email" type="email" placeholder="Email Address" style="flex: 1;">
+                <button id="verifyBtn" type="button" onclick="sendOtp()"
+                    style="width: auto; padding: 0 15px; font-size: 13px; background: #2196F3;">Verify</button>
+            </div>
+
+            <div id="otpSection" style="display: none; margin-bottom: 15px;">
+                <input id="otp" type="text" placeholder="Enter 6-digit OTP" maxlength="6"
+                    style="letter-spacing: 2px; font-weight: bold; text-align: center;">
+                <p style="font-size: 12px; color: #666; margin-top: 5px;">OTP sent to your email. Valid for 5 minutes.
+                </p>
+            </div>
+
+            <input id="password" type="password" placeholder="Password">
+
+            <select id="role">
+                <option value="" disabled selected>Select Role</option>
+                <option value="FARMER">Farmer</option>
+                <option value="RETAILER">Retailer</option>
+            </select>
+
+            <input id="phone" type="text" placeholder="Phone Number">
+            <input id="address" type="text" placeholder="Address">
+
+            <button type="button" onclick="submitRegistration()">Register</button>
+
+            <p id="msg"></p>
+        </div>
+    </div>
+
+    <script>
+        function sendOtp() {
+            const email = document.getElementById("email").value.trim();
+            const msg = document.getElementById("msg");
+            const verifyBtn = document.getElementById("verifyBtn");
+
+            if (!email) {
+                alert("Please enter email first");
+                return;
+            }
+
+            verifyBtn.innerText = "Sending...";
+            verifyBtn.disabled = true;
+            msg.innerText = "Sending OTP...";
+            msg.style.color = "blue";
+
+            console.log(">>> FRONTEND SENDING OTP TO:", email); // DEBUG LOG
+
+            fetch("http://localhost:8080/api/auth/send-otp", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: email })
+            })
+                .then(res => {
+                    if (!res.ok) {
+                        return res.text().then(text => { throw new Error(text) });
+                    }
+                    return res.text();
+                })
+                .then(data => {
+                    alert("OTP Sent! Check your email.");
+                    document.getElementById("otpSection").style.display = "block";
+                    document.getElementById("email").readOnly = true;
+                    verifyBtn.innerText = "Sent";
+                    msg.innerText = "";
+                })
+                .catch(err => {
+                    console.error(err);
+                    // Try to parse the error message if it's a JSON string
+                    let errorMessage = err.message;
+                    try {
+                        const jsonObj = JSON.parse(err.message);
+                        if (jsonObj.message) errorMessage = jsonObj.message;
+                    } catch (e) {
+                        // ignore
+                    }
+
+                    alert("Failed: " + errorMessage);
+                    verifyBtn.innerText = "Verify";
+                    verifyBtn.disabled = false;
+                    msg.innerText = "Error: " + errorMessage;
+                    msg.style.color = "red";
+                });
+        }
+
+        function submitRegistration() {
+            console.log(">>> [1/5] submitRegistration START");
+
+            try {
+                const nameEl = document.getElementById("name");
+                const emailEl = document.getElementById("email");
+                const passEl = document.getElementById("password");
+                const roleEl = document.getElementById("role");
+                const phoneEl = document.getElementById("phone");
+                const addrEl = document.getElementById("address");
+                const otpEl = document.getElementById("otp");
+                const msgEl = document.getElementById("msg");
+
+                console.log(">>> [2/5] Elements found check:", {
+                    name: !!nameEl, email: !!emailEl, pass: !!passEl, role: !!roleEl,
+                    phone: !!phoneEl, addr: !!addrEl, otp: !!otpEl, msg: !!msgEl
+                });
+
+                const name = nameEl.value.trim();
+                const email = emailEl.value.trim();
+                const password = passEl.value.trim();
+                const role = roleEl.value;
+                const phone = phoneEl.value.trim();
+                const address = addrEl.value.trim();
+                const otp = otpEl.value.trim();
+
+                console.log(">>> [3/5] Values extracted:", { name, email, role, otp });
+
+                if (!name || !email || !password || !role || !otp) {
+                    const error = "Please fill name, email, password, role AND otp!";
+                    console.warn(">>> [X] Validation failed:", error);
+                    alert(error);
+                    msgEl.innerText = error;
+                    msgEl.style.color = "red";
+                    return;
+                }
+
+                const payload = { name, email, password, role, phone, address, otp };
+                console.log(">>> [4/5] Sending payload:", payload);
+
+                msgEl.innerText = "Processing registration...";
+                msgEl.style.color = "blue";
+
+                fetch("http://localhost:8080/api/auth/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                })
+                    .then(res => {
+                        console.log(">>> [5/5] Response received, status:", res.status);
+                        if (!res.ok) {
+                            return res.json().then(errorData => {
+                                throw new Error(errorData.message || "Registration failed (Status 400)");
+                            });
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        console.log(">>> SUCCESS:", data);
+                        alert("Registered Successfully!");
+                        window.location.href = "login.html";
+                    })
+                    .catch(err => {
+                        console.error(">>> FETCH ERROR:", err);
+                        alert("Error: " + err.message);
+                        msgEl.innerText = "Error: " + err.message;
+                        msgEl.style.color = "red";
+                    });
+
+            } catch (err) {
+                console.error(">>> CRITICAL JS ERROR:", err);
+                alert("CRITICAL ERROR: " + err.message + "\nCheck console for details.");
+            }
+        }
+
+        console.log(">>> Register Script Loaded Successfully!");
+    </script>
+</body>
+
+</html>

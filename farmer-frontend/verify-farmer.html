@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Verification - Farmer Market</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="farmer.css">
+    <style>
+        .verify-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        .status-badge {
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-approved { background: #d4edda; color: #155724; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+
+<div class="verify-container">
+    <h2>Farmer Verification</h2>
+    <div id="status-message"></div>
+
+    <form id="verify-form">
+        <div class="form-group">
+            <label>Aadhaar Number</label>
+            <input type="text" id="aadhaarNum" required placeholder="Enter 12-digit Aadhaar">
+        </div>
+        <div class="form-group">
+            <label>PAN Number</label>
+            <input type="text" id="panNum" required placeholder="Enter PAN Number">
+        </div>
+        <div class="form-group">
+            <label>Aadhaar Card Image</label>
+            <input type="file" id="aadhaarImg" accept="image/*" required>
+        </div>
+        <div class="form-group">
+            <label>PAN Card Image</label>
+            <input type="file" id="panImg" accept="image/*" required>
+        </div>
+        <button type="submit" class="btn">Submit Documents</button>
+    </form>
+    <br>
+    <a href="farmer-dashboard.html">Back to Dashboard</a>
+</div>
+
+<script>
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user || user.role !== "FARMER") window.location.href = "login.html";
+
+    // Check status on load
+    fetch(`http://localhost:8080/api/verification/${user.id}`)
+        .then(res => {
+            if(res.status === 200) return res.json();
+            return null;
+        })
+        .then(doc => {
+            const msgDiv = document.getElementById("status-message");
+            const form = document.getElementById("verify-form");
+
+            if (doc) {
+                if (doc.status === "PENDING") {
+                    msgDiv.innerHTML = `<div class='status-badge status-pending'>Verification Pending. Please wait for Admin approval.</div>`;
+                    form.style.display = "none";
+                } else if (doc.status === "APPROVED") {
+                    msgDiv.innerHTML = `<div class='status-badge status-approved'>✅ You are verified!</div>`;
+                    form.style.display = "none";
+                } else if (doc.status === "REJECTED") {
+                    msgDiv.innerHTML = `<div class='status-badge status-rejected'>❌ Rejected: ${doc.rejectionReason}. Please resubmit.</div>`;
+                }
+            }
+        });
+
+    document.getElementById("verify-form").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        
+        const btn = e.target.querySelector("button");
+        btn.disabled = true;
+        btn.innerText = "Uploading...";
+
+        const formData = new FormData();
+        formData.append("aadhaarNumber", document.getElementById("aadhaarNum").value);
+        formData.append("panNumber", document.getElementById("panNum").value);
+        formData.append("aadhaarImage", document.getElementById("aadhaarImg").files[0]);
+        formData.append("panImage", document.getElementById("panImg").files[0]);
+
+        try {
+            const res = await fetch(`http://localhost:8080/api/verification/${user.id}/upload`, {
+                method: "POST",
+                body: formData
+            });
+
+            if (res.ok) {
+                alert("Documents uploaded successfully!");
+                location.reload();
+            } else {
+                throw new Error("Upload failed");
+            }
+        } catch (err) {
+            alert(err.message);
+            btn.disabled = false;
+            btn.innerText = "Submit Documents";
+        }
+    });
+</script>
+
+</body>
+</html>

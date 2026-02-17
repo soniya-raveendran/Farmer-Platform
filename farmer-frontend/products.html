@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Browse Products | Retailer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.0/css/all.css">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+body{background:#f4f7fb}
+.layout{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{
+  width:240px;background:#fff;padding:20px;border-right:1px solid #ddd
+}
+.brand{font-size:22px;font-weight:600;color:#1e8e6e;margin-bottom:30px}
+.menu a{
+  display:flex;gap:12px;padding:12px;border-radius:8px;
+  color:#555;text-decoration:none;margin-bottom:6px
+}
+.menu a.active,.menu a:hover{background:#e7f6f1;color:#1e8e6e}
+
+/* MAIN */
+.main{flex:1;padding:28px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+
+/* FILTER BAR */
+.filters{
+  display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px
+}
+.filters input,.filters select{
+  padding:10px 14px;border-radius:10px;border:1px solid #ddd;
+  font-size:14px
+}
+
+/* PRODUCTS */
+.products{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:24px
+}
+.card{
+  background:#fff;border-radius:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,.05);
+  overflow:hidden;transition:.2s
+}
+.card:hover{transform:translateY(-4px)}
+.card img{width:100%;height:180px;object-fit:cover}
+
+.content{padding:18px}
+.farmer{
+  font-size:12px;background:#eef2ff;color:#4338ca;
+  padding:4px 10px;border-radius:12px;display:inline-block
+}
+.title{font-size:18px;font-weight:600;margin:8px 0}
+.price{color:#1e8e6e;font-size:18px;font-weight:600}
+.stock{font-size:13px;color:#555;margin:6px 0}
+
+.btn{
+  margin-top:12px;width:100%;padding:12px;
+  border:none;border-radius:10px;
+  background:#1e8e6e;color:#fff;
+  cursor:pointer;font-size:15px
+}
+.btn:hover{background:#157a5f}
+/* ===============================
+   FIXED SIDEBAR (ADMIN + FARMER)
+================================ */
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 260px;
+  overflow-y: auto;
+  z-index: 1000;
+  background: #ffffff;
+  border-right: 1px solid #eaeaea;
+}
+
+/* Main content moves beside sidebar */
+.main {
+  margin-left: 260px;
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+/* Prevent body horizontal scroll */
+body {
+  overflow-x: hidden;
+}
+/* ===============================
+   STICKY TOPBAR
+================================ */
+/* Sticky header + filters */
+.sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 800;
+  background: #f9fafb;
+  padding-bottom: 10px;
+}
+
+/* Header styling */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+
+/* Filters stay visible */
+.filters {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+
+</style>
+</head>
+
+<body>
+<div class="layout">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="brand">🌱 ROOTS</div>
+  <div class="menu">
+    <a href="retdash.html"><i class="fa fa-chart-line"></i>Dashboard</a>
+    <a class="active"><i class="fa fa-store"></i>Browse Products</a>
+    <a href="myorder.html"><i class="fa fa-box"></i>My Orders</a>
+    <a href="place-order.html"><i class="fa fa-box"></i>My Cart</a>
+  </div>
+</aside>
+
+<main class="main">
+
+  <!-- STICKY TOP AREA -->
+  <div class="sticky-top">
+
+    <div class="header">
+      <h2>Available Products</h2>
+      <div>Welcome, <b>Retailer</b></div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters">
+      <input id="searchInput" placeholder="Search products...">
+
+      <select id="sortPrice">
+        <option value="">Sort by price</option>
+        <option value="asc">Low → High</option>
+        <option value="desc">High → Low</option>
+      </select>
+
+      <select id="categoryFilter">
+        <option value="">All Categories</option>
+      </select>
+
+      <select id="stockFilter">
+        <option value="">All</option>
+        <option value="in">In stock</option>
+      </select>
+    </div>
+
+  </div>
+
+  <!-- PRODUCTS -->
+  <div class="products" id="productList"></div>
+
+</main>
+
+</div>
+
+<script>
+/* AUTH */
+const user = JSON.parse(localStorage.getItem("user") || "null");
+if(!user || user.role !== "RETAILER"){
+  alert("Login as retailer");
+  location.href="login.html";
+}
+
+/* GLOBAL */
+const list = document.getElementById("productList");
+let allProducts = [];
+
+/* IMAGE */
+function img(p) {
+  if (!p.imageUrl) return "https://via.placeholder.com/300";
+
+  if (p.imageUrl.startsWith("http")) return p.imageUrl;
+
+  // fallback for old local paths
+  return `http://localhost:8080${p.imageUrl}`;
+}
+
+/* LOAD PRODUCTS */
+fetch("http://localhost:8080/api/products/all")
+.then(res => res.json())
+.then(data => {
+  allProducts = data;
+  loadCategories(data);
+  render(data);
+})
+.catch(() => list.innerHTML = "<p>Failed to load products</p>");
+
+function loadCategories(data){
+  const catDropdown = document.getElementById("categoryFilter");
+  const categories = [...new Set(data.map(p => p.category))];
+
+  categories.forEach(c => {
+    const op = document.createElement("option");
+    op.value = c;
+    op.textContent = c;
+    catDropdown.appendChild(op);
+  });
+}
+
+/* RENDER */
+function render(products){
+  list.innerHTML = "";
+
+  if(products.length === 0){
+    list.innerHTML = "<p>No products found</p>";
+    return;
+  }
+
+  products.forEach(p => {
+    list.innerHTML += `
+      <div class="card">
+        <img src="${img(p)}" onerror="this.src='https://via.placeholder.com/300'">
+        <div class="content">
+          <span class="farmer">${p.farmer?.name || "Farmer"}</span>
+          <div class="title">${p.name}</div>
+          <div class="category">${p.category}</div>
+          <div class="price">₹${p.price}</div>
+          <div class="stock">Available: ${p.quantity}</div>
+    <div class="btn-row">
+  <button class="btn cart-btn" onclick="addToCartById(${p.id})">
+    Add to Cart
+  </button>
+
+  <button class="btn order-btn" onclick="goToPlaceOrder(${p.id})">
+    Place Order
+  </button>
+</div>
+
+
+        </div>
+      </div>
+    `;
+  });
+}
+function addToCartById(productId) {
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+  let existing = cart.find(item => item.id === productId);
+
+  if (existing) existing.qty += 1;
+  else cart.push({ id: productId, qty: 1 });
+
+  localStorage.setItem("cart", JSON.stringify(cart));
+  alert("✅ Added to cart!");
+}
+
+
+
+/* FILTER LOGIC */
+document.getElementById("searchInput").addEventListener("input", applyFilters);
+document.getElementById("sortPrice").addEventListener("change", applyFilters);
+document.getElementById("stockFilter").addEventListener("change", applyFilters);
+document.getElementById("categoryFilter").addEventListener("change", applyFilters);
+
+function applyFilters(){
+  let search = document.getElementById("searchInput").value.toLowerCase();
+  let sort = document.getElementById("sortPrice").value;
+  let stock = document.getElementById("stockFilter").value;
+  let category = document.getElementById("categoryFilter").value;
+
+  let filtered = allProducts.filter(p =>
+    p.name.toLowerCase().includes(search) &&
+    (category === "" || p.category === category) &&
+    (stock !== "in" || p.quantity > 0)
+  );
+
+  if(sort === "asc") filtered.sort((a,b)=>a.price-b.price);
+  if(sort === "desc") filtered.sort((a,b)=>b.price-a.price);
+
+  render(filtered);
+}
+
+function goToPlaceOrder(productId){
+  window.location.href = `place-order.html?productId=${productId}`;
+}
+</script>
+
+</body>
+</html>
+
+
+

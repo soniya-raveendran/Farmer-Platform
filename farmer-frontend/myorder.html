@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>My Orders | ROOTS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --green: #10b981;
+      --light-green: #e7f8f2;
+      --dark-gray: #333;
+      --light-gray: #f6f8f7;
+      --warning: #ffc107;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: var(--light-gray);
+    }
+
+    /* Layout */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 220px;
+      background: #fff;
+      padding: 20px;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .sidebar .brand {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 20px;
+    }
+
+    .sidebar ul.menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar ul.menu li {
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      border-radius: 8px;
+      color: var(--dark-gray);
+      margin-bottom: 6px;
+    }
+
+    .sidebar ul.menu li.active,
+    .sidebar ul.menu li:hover {
+      background: var(--light-green);
+      color: var(--green);
+    }
+
+    /* Main */
+    .content {
+      flex: 1;
+      margin-left: 220px;
+      padding: 30px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: var(--dark-gray);
+    }
+
+    /* Order card */
+    .order-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .order-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    /* Order Header */
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .order-header h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: var(--green);
+    }
+
+    .order-header p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .status {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+    }
+
+    .status.pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status.processing {
+      background: #d1e7dd;
+      color: #0f5132;
+    }
+
+    .status.shipped {
+      background: #d1e7dd;
+      color: #0f5132;
+    }
+
+    .status.delivered {
+      background: #10b981;
+      color: #fff;
+    }
+
+    .status.cancelled {
+      background: #f8d7da;
+      color: #842029;
+    }
+
+    /* Order Items */
+    .order-items {
+      margin-top: 15px;
+      border-top: 1px solid #eee;
+      padding-top: 10px;
+    }
+
+    .order-item {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .order-item img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .order-item h4 {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--dark-gray);
+    }
+
+    .order-item p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    /* Tracking Progress Bar with fill */
+    .tracking-progress {
+      margin: 20px 15px;
+    }
+
+    .tracking-progress .progress-bar {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      align-items: center;
+    }
+
+    .tracking-progress .progress-bar::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 5%;
+      right: 5%;
+      height: 4px;
+      background: #ddd;
+      transform: translateY(-50%);
+      z-index: 0;
+      border-radius: 2px;
+    }
+
+    .tracking-progress .progress-fill {
+      position: absolute;
+      top: 50%;
+      left: 5%;
+      height: 4px;
+      background: var(--green);
+      transform: translateY(-50%);
+      z-index: 1;
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    .tracking-progress .step {
+      z-index: 2;
+      text-align: center;
+      position: relative;
+      flex: 1;
+    }
+
+    .tracking-progress .step .icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      color: #fff;
+      font-size: 16px;
+    }
+
+    .tracking-progress .step.completed .icon {
+      background: var(--green);
+    }
+
+    .tracking-progress .step span {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: #333;
+    }
+
+    /* Actions */
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .pay-btn,
+    .cancel-btn,
+    .feedback-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .pay-btn {
+      background: var(--green);
+      color: #fff;
+    }
+
+    .cancel-btn {
+      background: var(--warning);
+      color: #333;
+    }
+
+    .feedback-btn {
+      background: #0d6efd;
+      color: #fff;
+    }
+
+    .pay-btn:hover {
+      background: #0a8c5f;
+    }
+
+    .cancel-btn:hover {
+      background: #e0a800;
+    }
+
+    .feedback-btn:hover {
+      background: #084298;
+    }
+
+    /* Responsive */
+    @media(max-width:768px) {
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+      }
+
+      .content {
+        margin-left: 0;
+        padding: 20px;
+      }
+    }
+
+    /* Modal Styles for Feedback */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    .modal h2 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .stars {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+
+    .stars i {
+      font-size: 24px;
+      color: #ddd;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .stars i.active {
+      color: #ffc107;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      resize: none;
+      height: 80px;
+      margin-bottom: 15px;
+    }
+
+    .modal-btns {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .btn-submit {
+      background: var(--green);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-cancel {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">🌱 ROOTS</div>
+      <ul class="menu">
+        <li onclick="location.href='retdash.html'"><i class="fa fa-chart-line"></i> Dashboard</li>
+        <li class="active"><i class="fa fa-box"></i> My Orders</li>
+        <li onclick="location.href='profile.html'"><i class="fa fa-user"></i> Profile</li>
+        <li onclick="logout()"><i class="fa fa-sign-out-alt"></i> Logout</li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+      <h1>My Orders</h1>
+      <div id="ordersContainer" class="orders-container"></div>
+    </main>
+  </div>
+
+  <!-- Feedback Modal -->
+  <div class="modal-overlay" id="feedbackModal">
+    <div class="modal">
+      <h2>Rate Order</h2>
+      <div class="stars" id="starContainer">
+        <i class="fa fa-star" data-val="1"></i>
+        <i class="fa fa-star" data-val="2"></i>
+        <i class="fa fa-star" data-val="3"></i>
+        <i class="fa fa-star" data-val="4"></i>
+        <i class="fa fa-star" data-val="5"></i>
+      </div>
+      <textarea id="feedbackComment" placeholder="Write your experience..."></textarea>
+      <div class="modal-btns">
+        <button class="btn-submit" onclick="submitFeedback()">Submit</button>
+        <button class="btn-cancel" onclick="closeFeedback()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Complaint Modal -->
+  <div class="modal-overlay" id="complaintModal">
+    <div class="modal">
+      <h2>Raise Complaint</h2>
+      <p style="font-size:12px; color:#666; margin-bottom:10px;">For Order #<span id="complaintOrderIdText"></span></p>
+      <textarea id="complaintMessage" placeholder="Describe your issue in detail..."></textarea>
+      <div class="modal-btns">
+        <button class="btn-submit" onclick="submitComplaint()" style="background:#ffc107; color:#333;">Submit
+          Complaint</button>
+        <button class="btn-cancel"
+          onclick="document.getElementById('complaintModal').style.display='none'">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentComplaintOrderId = null;
+    function openComplaint(orderId) {
+      currentComplaintOrderId = orderId;
+      document.getElementById("complaintOrderIdText").innerText = orderId;
+      document.getElementById("complaintMessage").value = "";
+      document.getElementById("complaintModal").style.display = "flex";
+    }
+
+    async function submitComplaint() {
+      const msg = document.getElementById("complaintMessage").value;
+      if (!msg) return alert("Please describe your issue");
+
+      try {
+        const res = await fetch("http://localhost:8080/api/complaints/add", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            retailerId: user.id,
+            orderId: currentComplaintOrderId,
+            message: msg
+          })
+        });
+        if (res.ok) {
+          alert("Complaint raised successfully. Admin will respond soon.");
+          document.getElementById('complaintModal').style.display = 'none';
+        } else {
+          alert("Failed to raise complaint");
+        }
+      } catch (e) { console.error(e); }
+    }
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user || !user.id) { alert("Please login"); window.location.href = "login.html"; }
+    const retailerId = user.id;
+
+    /* Logout */
+    function logout() { localStorage.clear(); window.location.href = "login.html"; }
+
+    /* Payment / Cancel / Feedback placeholders */
+    function payNow(orderId) { window.location.href = `pay.html?orderId=${orderId}`; }
+
+    async function cancelOrder(orderId) {
+      if (!confirm("Are you sure you want to cancel?")) return;
+      try {
+        const res = await fetch(`http://localhost:8080/api/orders/cancel/${orderId}`, { method: "POST" });
+        if (res.ok) { alert("Order cancelled"); location.reload(); }
+        else alert("Failed to cancel");
+      } catch (e) { console.error(e); }
+    }
+
+    let currentFeedbackOrderId = null;
+    let currentRating = 0;
+
+    function openFeedback(orderId) {
+      currentFeedbackOrderId = orderId;
+      currentRating = 0;
+      document.getElementById("feedbackModal").style.display = "flex";
+      document.getElementById("feedbackComment").value = "";
+      updateStars(0);
+    }
+
+    function closeFeedback() {
+      document.getElementById("feedbackModal").style.display = "none";
+    }
+
+    function updateStars(val) {
+      currentRating = val;
+      const stars = document.querySelectorAll("#starContainer i");
+      stars.forEach(s => {
+        const v = parseInt(s.getAttribute("data-val"));
+        if (v <= val) s.classList.add("active");
+        else s.classList.remove("active");
+      });
+    }
+
+    document.querySelectorAll("#starContainer i").forEach(star => {
+      star.addEventListener("click", function () {
+        updateStars(parseInt(this.getAttribute("data-val")));
+      });
+    });
+
+    async function submitFeedback() {
+      if (currentRating === 0) { alert("Please select a rating star"); return; }
+      const comment = document.getElementById("feedbackComment").value;
+
+      try {
+        const res = await fetch("http://localhost:8080/api/feedback/add", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId: currentFeedbackOrderId,
+            rating: currentRating,
+            comment: comment
+          })
+        });
+
+        if (res.ok) {
+          alert("Feedback submitted! Thank you.");
+          closeFeedback();
+        } else {
+          const txt = await res.text();
+          alert("Failed: " + txt);
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    /* Load Orders */
+    fetch(`http://localhost:8080/api/orders/retailer/${retailerId}`)
+      .then(res => res.json())
+      .then(orders => {
+        const container = document.getElementById("ordersContainer");
+        container.innerHTML = "";
+        if (!orders.length) { container.innerHTML = "<p>No orders placed yet.</p>"; return; }
+
+        // Sort by date desc
+        orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+
+        orders.forEach(order => {
+          const orderCard = document.createElement("div");
+          orderCard.className = "order-card";
+
+          // ----------- Progress Logic -----------
+          // Backend Statuses: PLACED, SHIPPED, DELIVERED, CANCELLED
+          // UI Steps: Processed (PLACED), Shipped (SHIPPED), En Route (placeholder), Arrived (DELIVERED)
+
+          const steps = [
+            { label: "Processed", statuses: ["PLACED", "CONFIRMED", "PROCESSING"] },
+            { label: "Shipped", statuses: ["SHIPPED"] },
+            { label: "En Route", statuses: ["OUT_FOR_DELIVERY", "EN_ROUTE"] },
+            { label: "Arrived", statuses: ["DELIVERED", "COMPLETED"] }
+          ];
+
+          const currentStatus = (order.status || "").toUpperCase();
+
+          // Find generic index
+          let stepIndex = -1;
+
+          if (steps[3].statuses.includes(currentStatus)) stepIndex = 3;
+          else if (steps[2].statuses.includes(currentStatus)) stepIndex = 2;
+          else if (steps[1].statuses.includes(currentStatus)) stepIndex = 1;
+          else stepIndex = 0; // Default to Processed if not shipped/delivered yet, unless cancelled?
+
+          if (currentStatus === "CANCELLED") stepIndex = -1;
+
+          // Calculate width
+          // If stepIndex is 0 (Processed), width is 0% (start).
+          // If stepIndex is 3 (Arrived), width is 100%.
+          // steps len = 4. intervals = 3.
+          // Width = (stepIndex / 3) * 100
+
+          let fillWidth = 0;
+          if (stepIndex >= 0) {
+            fillWidth = (stepIndex / (steps.length - 1)) * 100;
+          }
+
+          let trackingHTML = "";
+          if (currentStatus !== "CANCELLED") {
+            trackingHTML = `<div class="tracking-progress"><div class="progress-bar">
+                        <div class="progress-fill" style="width:${fillWidth}%;"></div>`;
+
+            steps.forEach((step, idx) => {
+              // Icon mapping
+              const icons = ["fa-clipboard-check", "fa-truck-fast", "fa-route", "fa-house-circle-check"];
+              const isCompleted = idx <= stepIndex;
+
+              trackingHTML += `
+                <div class="step ${isCompleted ? "completed" : ""}">
+                    <div class="icon"><i class="fa ${icons[idx]}"></i></div>
+                    <span>${step.label}</span>
+                </div>
+            `;
+            });
+            trackingHTML += `</div></div>`;
+          } else {
+            trackingHTML = `<div style="text-align:center; color:red; padding:10px; font-weight:bold; background:#fef2f2; border-radius:8px; margin-top:10px;">
+                            <i class="fa fa-ban"></i> Order Cancelled
+                        </div>`;
+          }
+
+          // --------------------------------------
+
+          const isDelivered = ["DELIVERED", "COMPLETED"].includes(currentStatus);
+
+          orderCard.innerHTML = `
+      <div class="order-header">
+        <div>
+          <h3>Order #${order.id}</h3>
+          <p>${new Date(order.orderDate).toLocaleString()}</p>
+        </div>
+        <span class="status ${currentStatus.toLowerCase()}">${currentStatus}</span>
+      </div>
+      
+      ${(order.trackingNumber && order.trackingCompany) ? `
+        <div style="background:#f0f9ff; padding:10px; border-radius:8px; margin:10px 0; border:1px solid #bae6fd; font-size:13px; color:#0369a1;">
+          <i class="fa fa-truck-fast"></i> <b>Tracking:</b> ${order.trackingCompany} - ${order.trackingNumber}
+        </div>
+      ` : ""}
+
+      <div class="order-items" id="items-${order.id}">Loading items...</div>
+      
+      ${trackingHTML}
+
+      <div class="actions">
+        ${(order.paymentStatus !== "PAID" && currentStatus !== "CANCELLED") ? `<button class="pay-btn" onclick="payNow(${order.id})">Pay Now</button>` : ""}
+        ${(!isDelivered && currentStatus !== "CANCELLED") ? `<button class="cancel-btn" onclick="cancelOrder(${order.id})">Cancel</button>` : ""}
+        ${isDelivered ? `<button class="feedback-btn" onclick="openFeedback(${order.id})"><i class="fa fa-star"></i> Rate Product</button>` : ""}
+        <button class="cancel-btn" style="background:#6c757d; color:white;" onclick="openComplaint(${order.id})"><i class="fa fa-circle-exclamation"></i> Raise Complaint</button>
+      </div>
+    `;
+
+          container.appendChild(orderCard);
+
+          // Load order items
+          fetch(`http://localhost:8080/api/orders/${order.id}/items`)
+            .then(res => res.json())
+            .then(items => {
+              const itemsDiv = document.getElementById(`items-${order.id}`);
+              itemsDiv.innerHTML = "";
+              items.forEach(item => {
+                const imgUrl = item.product.imageUrl ? (item.product.imageUrl.startsWith("http") ? item.product.imageUrl : `http://localhost:8080/${item.product.imageUrl.replace(/^\/+/, "")}`) : "https://placehold.co/400x400?text=ROOTS";
+                itemsDiv.innerHTML += `
+          <div class="order-item">
+            <img src="${imgUrl}">
+            <div>
+              <h4>${item.product.name}</h4>
+              <p>Qty: ${item.quantity} kg</p>
+              <p>₹${item.price}</p>
+            </div>
+          </div>`;
+              });
+            });
+        });
+      })
+      .catch(e => {
+        console.error(e);
+        document.getElementById("ordersContainer").innerHTML = "<p>Failed to load orders/Server Error</p>"
+      });
+  </script>
+
+</body>
+
+</html>

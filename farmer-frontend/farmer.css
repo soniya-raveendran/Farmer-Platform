@@ -1,0 +1,502 @@
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  background: #f4f6f8;
+  color: #111827;
+  display: flex;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 20px;
+  color: #0f7d44;
+}
+
+.menu a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  text-decoration: none;
+  color: #374151;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  transition: 0.2s;
+}
+
+.menu a:hover {
+  background: #f0fdf4;
+  color: #0f7d44;
+}
+
+.menu a.active {
+  background: #eafaf1;
+  color: #0f7d44;
+  font-weight: 600;
+  border-left: 4px solid #0f7d44;
+}
+
+.logout-btn {
+  margin-top: auto;
+  padding: 10px;
+  width: 100%;
+  border: 1px solid #fca5a5;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.logout-btn:hover {
+  background: #fef2f2;
+}
+
+/* MAIN */
+.main {
+  flex: 1;
+  padding: 18px 26px;
+}
+
+.topbar {
+  background: #fff;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.breadcrumb h2 {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.breadcrumb p {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.top-btn {
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.top-btn:hover {
+  background: #f9fafb;
+}
+
+.page-title {
+  margin: 20px 0;
+}
+
+.page-title h1 {
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.page-title p {
+  margin-top: 6px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* CONTENT CARD */
+.content-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px;
+  margin-top: 18px;
+}
+
+/* INVENTORY GRID */
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.inventory-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.inventory-img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.inventory-body {
+  padding: 14px;
+}
+
+.inventory-body h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.badge {
+  background: #eafaf1;
+  color: #0f7d44;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.meta small {
+  display: block;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.edit-btn {
+  margin-top: 14px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #0f7d44;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.edit-btn:hover {
+  background: #0c6737;
+}
+
+/* ORDERS TABLE */
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+.orders-table th, .orders-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: left;
+  font-size: 14px;
+}
+
+.orders-table th {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.status {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status.processing { background: #ede9fe; color: #6d28d9; }
+.status.pending { background: #fef9c3; color: #ca8a04; }
+.status.cancelled { background: #fee2e2; color: #dc2626; }
+.status.paid { background: #dcfce7; color: #16a34a; }
+
+select {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+/* PROFILE */
+.profile-box {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #eafaf1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  color: #0f7d44;
+  font-weight: 700;
+}
+
+.profile-details h2 {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.profile-details p {
+  color: #6b7280;
+  font-size: 14px;
+}
+/* ✅ FORM UI */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.input-box label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.input-box input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  outline: none;
+}
+
+.input-box input:focus {
+  border-color: #0f7d44;
+}
+.toast{
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #111827;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+  z-index: 9999;
+}
+
+.toast.hidden{
+  display: none;
+}
+/* ================= ADD PRODUCT BUTTON ================= */
+
+.primary-btn {
+  margin-top: 20px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #2e7d32, #43a047);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  box-shadow: 0 8px 20px rgba(46, 125, 50, 0.25);
+  transition: all 0.3s ease;
+}
+
+/* Hover effect */
+.primary-btn:hover {
+  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(46, 125, 50, 0.35);
+}
+
+/* Click effect */
+.primary-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 6px 16px rgba(46, 125, 50, 0.25);
+}
+
+/* Icon styling */
+.primary-btn i {
+  font-size: 18px;
+}
+/* ✅ Modal Background */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.hidden {
+  display: none;
+}
+
+/* ✅ Modal Box */
+.modal-box {
+  background: #fff;
+  width: 420px;
+  border-radius: 16px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+  overflow: hidden;
+  animation: popup 0.25s ease;
+}
+
+@keyframes popup {
+  from { transform: scale(0.9); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* ✅ Header */
+.modal-header {
+  background: linear-gradient(135deg, #2f6f3e, #4CAF50);
+  color: white;
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  color: white;
+  cursor: pointer;
+}
+
+/* ✅ Body */
+.modal-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-body label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.modal-body input {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  outline: none;
+  font-size: 14px;
+}
+
+.modal-body input:focus {
+  border-color: #4CAF50;
+}
+
+/* ✅ Actions */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.cancel-btn {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background: #f4f4f4;
+  cursor: pointer;
+}
+
+.save-btn {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: #2f6f3e;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.save-btn:hover {
+  background: #245531;
+}
+/* ✅ Sidebar fixed while scrolling */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;          /* full screen height */
+  width: 260px;           /* keep your sidebar width */
+  overflow-y: auto;       /* sidebar scroll if menu is long */
+  z-index: 1000;
+}
+
+/* ✅ Main content should start after sidebar */
+.main {
+  margin-left: 260px;     /* same as sidebar width */
+  min-height: 100vh;
+}
+
+/* ✅ Smooth scroll look (optional) */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: #cfcfcf;
+  border-radius: 10px;
+}
+.badge.processing { background-color: #facc15; color: #000; } /* yellow */
+.badge.packing { background-color: #3b82f6; color: #fff; }    /* blue */
+.badge.shipped { background-color: #16a34a; color: #fff; }    /* green */
+
+

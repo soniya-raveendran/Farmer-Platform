@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Verification Status Update</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+        }
+
+        .header {
+            background-color: #2196F3;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            margin-top: 20px;
+        }
+
+        .status-box {
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: inline-block;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .approved {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .rejected {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        .pending {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .reason {
+            color: #c62828;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Verification Update</h1>
+        </div>
+        <div class="content">
+            <p>Hello <span th:text="${doc.farmer.name}">Farmer</span>,</p>
+            <p>The status of your profile verification has been updated.</p>
+
+            <p>Current Status:
+                <span
+                    th:classappend="${#strings.toString(doc.status) == 'APPROVED' ? 'status-box approved' : (#strings.toString(doc.status) == 'REJECTED' ? 'status-box rejected' : 'status-box pending')}"
+                    th:text="${doc.status}">PENDING</span>
+            </p>
+
+            <div th:if="${#strings.toString(doc.status) == 'REJECTED'}" class="reason">
+                <p><strong>Reason for rejection:</strong> <span th:text="${doc.rejectionReason}">Reason goes
+                        here.</span></p>
+                <p>Please re-upload your documents with the necessary corrections to continue using all features of
+                    ROOTS.</p>
+            </div>
+
+            <div th:if="${#strings.toString(doc.status) == 'APPROVED'}">
+                <p>Congratulations! Your profile is now verified. You can now list your products and receive orders on
+                    our platform.</p>
+            </div>
+
+            <p>If you have any questions, please contact our support team.</p>
+            <p>Best regards,<br />The ROOTS Team</p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2026 ROOTS Agri Trade. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+
+</html>

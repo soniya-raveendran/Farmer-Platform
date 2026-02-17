@@ -1,0 +1,12 @@
+target/
+*.class
+.mvn/
+mvnw
+mvnw.cmd
+.idea/
+*.iml
+.vscode/
+node_modules/
+.DS_Store
+OTP.txt
+uploads/

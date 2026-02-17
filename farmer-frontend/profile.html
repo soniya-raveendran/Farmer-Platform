@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Profile | Retailer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+    body{background:#f7fbfa}
+
+    .layout{display:flex;min-height:100vh}
+
+    /* SIDEBAR */
+    .sidebar{width:240px;background:#ffffff;border-right:1px solid #e5e7eb;padding:20px;position:relative}
+    .logo{font-size:22px;font-weight:600;color:#10b981;margin-bottom:30px}
+    .menu a{display:flex;align-items:center;gap:12px;padding:12px 14px;color:#555;text-decoration:none;border-radius:8px;margin-bottom:6px}
+    .menu a.active,.menu a:hover{background:#e7f8f2;color:#10b981}
+    .menu i{width:20px}
+    .logout{position:absolute;bottom:20px;width:calc(100% - 40px)}
+
+    /* MAIN */
+    .main{flex:1;padding:28px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .breadcrumb{font-size:14px;color:#6b7280}
+
+    /* PROFILE CARD */
+    .profile-card{background:#ffffff;border-radius:18px;padding:32px;max-width:820px;box-shadow:0 10px 30px rgba(0,0,0,0.06)}
+    .profile-card h2{font-size:26px;margin-bottom:4px}
+    .profile-card p{color:#6b7280;margin-bottom:24px}
+
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+    .field label{font-size:13px;color:#6b7280;display:block;margin-bottom:6px}
+    .field i{margin-right:6px;color:#10b981}
+    .field input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #e5e7eb;background:#f9fafb}
+
+    .security{margin-bottom:24px}
+    .security h4{margin-bottom:10px}
+    .change-btn{border:1px solid #6366f1;color:#6366f1;background:#fff;padding:10px 18px;border-radius:10px;cursor:pointer}
+
+    .save-btn{background:#6366f1;color:#fff;border:none;padding:12px 26px;border-radius:12px;cursor:pointer;font-size:15px}
+
+    @media(max-width:768px){
+      .sidebar{display:none}
+      .form-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">🌱 ROOTSr</div>
+    <div class="menu">
+      <a href="retdash.html"><i class="fa fa-chart-pie"></i>Dashboard</a>
+      <a href="products.html"><i class="fa fa-store"></i>Browse Products</a>
+      <a href="myorder.html"><i class="fa fa-box"></i>My Orders</a>
+      <a><i class="fa fa-truck"></i>Order Tracking</a>
+      <a><i class="fa fa-credit-card"></i>Payments</a>
+      <a><i class="fa fa-message"></i>Messages</a>
+      <a class="active"><i class="fa fa-user"></i>Profile</a>
+      <a><i class="fa fa-gear"></i>Settings</a>
+    </div>
+    <div class="logout">
+      <a onclick="logout()"><i class="fa fa-sign-out"></i> Logout</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <div class="topbar">
+      <div class="breadcrumb">RETAILER / Profile</div>
+      <div>Welcome, <b>Retailer</b></div>
+    </div>
+
+    <div class="profile-card">
+      <h2>My Profile</h2>
+      <p>View and manage your account details</p>
+
+    <div class="form-grid">
+  <div class="field">
+    <label><i class="fa fa-user"></i>Full Name</label>
+    <input type="text" id="nameInput" />
+  </div>
+
+  <div class="field">
+    <label><i class="fa fa-envelope"></i>Email Address</label>
+    <input type="email" id="emailInput" />
+  </div>
+
+  <div class="field">
+    <label><i class="fa fa-phone"></i>Phone Number</label>
+    <input type="text" id="phoneInput" />
+  </div>
+
+  <div class="field">
+    <label><i class="fa fa-id-badge"></i>Account Type</label>
+    <input type="text" id="roleInput" disabled />
+  </div>
+</div>
+
+
+      <div class="security">
+        <h4>Security</h4>
+        <button class="change-btn"><i class="fa fa-key"></i> Change Password</button>
+      </div>
+<button class="save-btn" onclick="saveProfile()">
+  Save Changes
+</button>
+
+<p id="msg" style="margin-top:12px;font-weight:600;"></p>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  // ✅ Load user from localStorage
+  const userStr = localStorage.getItem("user");
+
+  if (!userStr) {
+    alert("Please login first");
+    window.location.href = "login.html";
+  }
+
+  const user = JSON.parse(userStr);
+
+  // ✅ Retailer Only
+  if (!String(user.role || "").toUpperCase().includes("RETAILER")) {
+    alert("Retailer access only");
+    window.location.href = "login.html";
+  }
+
+  // ✅ Fill inputs
+  document.getElementById("nameInput").value = user.name || "";
+  document.getElementById("emailInput").value = user.email || "";
+  document.getElementById("phoneInput").value = user.phone || "";
+  document.getElementById("roleInput").value = user.role || "RETAILER";
+
+  // ✅ Logout
+  function logout() {
+    localStorage.clear();
+    location.href = "login.html";
+  }
+
+  // ✅ Save Profile (DB Update)
+  async function saveProfile() {
+    const name = document.getElementById("nameInput").value.trim();
+    const email = document.getElementById("emailInput").value.trim();
+    const phone = document.getElementById("phoneInput").value.trim();
+
+    const msg = document.getElementById("msg");
+
+    if (!name || !email || !phone) {
+      msg.style.color = "red";
+      msg.innerText = "⚠ Please fill all fields!";
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:8080/api/users/update/${user.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, email, phone })
+      });
+
+      if (res.ok) {
+        const updatedUser = await res.json();
+
+        // ✅ Update localStorage also
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+
+        msg.style.color = "green";
+        msg.innerText = "✅ Profile updated successfully!";
+      } else {
+        const errText = await res.text();
+        msg.style.color = "red";
+        msg.innerText = "❌ Update failed: " + errText;
+      }
+    } catch (err) {
+      console.error(err);
+      msg.style.color = "red";
+      msg.innerText = "❌ Server error while updating profile";
+    }
+  }
+</script>
+
+
+</body>
+</html>

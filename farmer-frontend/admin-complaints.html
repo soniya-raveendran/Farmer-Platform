@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Complaints | ROOTS</title>
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        .complaints-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .complaint-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid #10b981;
+        }
+
+        .complaint-card.pending {
+            border-left-color: #ffc107;
+        }
+
+        .complaint-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .status-badge {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-resolved {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .retailer-info {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .message-box {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .response-area {
+            margin-top: 15px;
+        }
+
+        textarea {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 13px;
+            min-height: 60px;
+        }
+
+        .resolve-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+            font-weight: bold;
+        }
+
+        .resolved-text {
+            font-size: 13px;
+            color: #10b981;
+            font-style: italic;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="brand"><i class="fa-solid fa-seedling"></i> ROOTS</div>
+        <nav class="menu">
+            <a href="admin-dashboard.html"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+            <a href="admin-users.html"><i class="fa-solid fa-users"></i> Manage Users</a>
+            <a href="admin-products.html"><i class="fa-solid fa-box"></i> Products</a>
+            <a href="admin-orders.html"><i class="fa-solid fa-receipt"></i> Orders</a>
+            <a href="admin-complaints.html" class="active"><i class="fa-solid fa-circle-exclamation"></i> Complaints</a>
+            <a href="admin-reviews.html"><i class="fa-solid fa-comment-dots"></i> Reviews</a>
+        </nav>
+        <button class="logout-btn" onclick="localStorage.clear(); window.location.href='login.html'"><i
+                class="fa-solid fa-right-from-bracket"></i> Logout</button>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <h2>Retailer Complaints</h2>
+            <p>Admin / Manage Issues</p>
+        </header>
+
+        <div id="complaintsContainer" class="complaints-grid">
+            <!-- Data will be injected here -->
+        </div>
+    </main>
+
+    <script>
+        async function loadComplaints() {
+            const res = await fetch("http://localhost:8080/api/complaints/all");
+            const data = await res.json();
+            const container = document.getElementById("complaintsContainer");
+            container.innerHTML = "";
+
+            if (data.length === 0) {
+                container.innerHTML = "<p>No complaints found.</p>";
+                return;
+            }
+
+            data.forEach(c => {
+                const card = document.createElement("div");
+                card.className = `complaint-card ${c.status.toLowerCase()}`;
+
+                card.innerHTML = `
+                    <div class="complaint-header">
+                        <strong>Complaint #${c.id}</strong>
+                        <span class="status-badge status-${c.status.toLowerCase()}">${c.status}</span>
+                    </div>
+                    <div class="retailer-info">
+                        From: ${c.retailer.name} (${c.retailer.email})
+                        ${c.order ? `<br>Order ID: #${c.order.id}` : ''}
+                    </div>
+                    <div class="message-box">${c.message}</div>
+                    ${c.status === 'PENDING' ? `
+                        <div class="response-area">
+                            <textarea id="resp-${c.id}" placeholder="Write your response..."></textarea>
+                            <button class="resolve-btn" onclick="resolveComplaint(${c.id})">Submit Response & Resolve</button>
+                        </div>
+                    ` : `
+                        <div class="resolved-text"><strong>Response:</strong> ${c.response}</div>
+                    `}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function resolveComplaint(id) {
+            const response = document.getElementById(`resp-${id}`).value;
+            if (!response) return alert("Please enter a response");
+
+            const res = await fetch(`http://localhost:8080/api/complaints/${id}/resolve`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ response })
+            });
+
+            if (res.ok) {
+                alert("Complaint resolved!");
+                loadComplaints();
+            }
+        }
+
+        loadComplaints();
+    </script>
+</body>
+
+</html>

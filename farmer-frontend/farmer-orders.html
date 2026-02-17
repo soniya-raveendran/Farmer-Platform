@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orders | Farmer</title>
+
+  <link rel="stylesheet" href="farmer.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <i class="fa-solid fa-seedling"></i>
+      <span>ROOTS</span>
+    </div>
+
+    <nav class="menu">
+      <a href="farmer-dashboard.html"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="inventory.html"><i class="fa-solid fa-warehouse"></i> Inventory</a>
+      <a href="farmer-orders.html" class="active"><i class="fa-solid fa-receipt"></i> Orders</a>
+      <a href="farmer-reviews.html"><i class="fa-solid fa-star"></i> Ratings & Reviews</a>
+      <a href="farmer-profile.html"><i class="fa-solid fa-user"></i> Profile</a>
+    </nav>
+
+    <button class="logout-btn" onclick="logout()">
+      <i class="fa-solid fa-right-from-bracket"></i> Logout
+    </button>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="breadcrumb">
+        <h2>Orders</h2>
+        <p>FARMER / Orders</p>
+      </div>
+
+      <div class="top-actions">
+        <span id="welcomeText">Welcome, Farmer</span>
+        <button class="top-btn"><i class="fa-solid fa-wallet"></i> Wallet</button>
+        <button class="top-btn"><i class="fa-regular fa-bell"></i> Notifications</button>
+      </div>
+    </header>
+
+    <!-- Title -->
+    <section class="page-title">
+      <h1>Orders Received</h1>
+      <p>View all orders for your products</p>
+    </section>
+
+    <!-- Orders Table -->
+    <section class="content-card">
+      <div style="overflow-x:auto;">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>PRODUCT NAME</th>
+              <th>QUANTITY</th>
+              <th>TOTAL AMOUNT</th>
+              <th>STATUS</th>
+              <th>MODE</th>
+              <th>PAYMENT</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+
+          <tbody id="ordersBody">
+            <tr>
+              <td colspan="7" style="text-align:center;color:#6b7280;padding:18px;">
+                Loading orders...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /* ================= AUTH ================= */
+
+    const userStr = localStorage.getItem("user");
+
+    if (!userStr) {
+      alert("Please login");
+      window.location.href = "login.html";
+    }
+
+    const user = JSON.parse(userStr);
+
+    if (!String(user.role || "").toUpperCase().includes("FARMER")) {
+      alert("Farmer access only");
+      window.location.href = "login.html";
+    }
+
+    document.getElementById("welcomeText").innerText = "Welcome, Farmer";
+
+    /* ================= BADGE HELPERS ================= */
+
+    function getStatusBadge(status) {
+      const s = (status || "PLACED").toUpperCase();
+      if (s === "COMPLETED" || s === "DELIVERED")
+        return `<span class="badge paid">${s}</span>`;
+      if (s === "CANCELLED")
+        return `<span class="badge cancelled">${s}</span>`;
+      if (s === "PROCESSING")
+        return `<span class="badge processing">${s}</span>`;
+      if (s === "PACKING")
+        return `<span class="badge packing">${s}</span>`;
+      if (s === "SHIPPED")
+        return `<span class="badge shipped">${s}</span>`;
+      return `<span class="badge pending">${s}</span>`;
+    }
+
+    function getPaymentClass(payment) {
+      switch ((payment || "PENDING").toUpperCase()) {
+        case "PAID": return "paid";
+        case "FAILED":
+        case "CANCELLED": return "cancelled";
+        default: return "pending";
+      }
+    }
+
+    /* ================= LOAD FARMER ORDERS ================= */
+
+    async function loadFarmerOrders() {
+      const tbody = document.getElementById("ordersBody");
+
+      tbody.innerHTML = `
+    <tr>
+      <td colspan="7" style="text-align:center;color:#6b7280;padding:18px;">
+        Loading orders...
+      </td>
+    </tr>
+  `;
+
+      try {
+        const res = await fetch(`http://localhost:8080/api/orders/farmer/${user.id}`);
+        if (!res.ok) throw new Error("API failed");
+
+        const items = await res.json();
+
+        if (!items || items.length === 0) {
+          tbody.innerHTML = `
+        <tr>
+          <td colspan="7" style="text-align:center;color:#6b7280;padding:18px;">
+            No orders received yet.
+          </td>
+        </tr>
+      `;
+          return;
+        }
+
+        tbody.innerHTML = "";
+
+        const statuses = ["PROCESSING", "SHIPPED"];
+
+        items.forEach(item => {
+          const order = item;
+          const product = item.product || {};
+          console.log("Order object:", order);
+
+          const status = (order.status || "PLACED").toUpperCase();
+          const payment = (order.paymentStatus || "PENDING").toUpperCase();
+
+          tbody.innerHTML += `
+        <tr>
+          <td>${product.name || "Product"}</td>
+          <td>${item.quantity}</td>
+
+          <td class="amount">
+            ₹${(item.price * item.quantity).toFixed(2)}
+          </td>
+
+          <!-- Status Badge -->
+          <td>${getStatusBadge(status)}</td>
+
+          <td>${order.mode || "ONLINE"}</td>
+
+          <td>
+            <span class="badge ${getPaymentClass(payment)}">
+              ${payment}
+            </span>
+          </td>
+
+          <!-- Actions: Dropdown + Save -->
+          <td>
+            <select id="status-${order.id}">
+              ${statuses.map(s => `
+                <option value="${s}" ${s === status ? "selected" : ""}>${s}</option>
+              `).join('')}
+            </select>
+            <button onclick="saveOrderStatus(${order.id})">Save</button>
+          </td>
+        </tr>
+      `;
+        });
+
+      } catch (err) {
+        console.error(err);
+        tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align:center;color:red;padding:18px;">
+          ❌ Failed to load orders
+        </td>
+      </tr>
+    `;
+      }
+    }
+
+    /* ================= SAVE STATUS ================= */
+
+    function saveOrderStatus(orderId) {
+      const selectEl = document.getElementById(`status-${orderId}`);
+      if (!selectEl) return alert("Status dropdown not found!");
+
+      const newStatus = selectEl.value.toUpperCase();
+
+      // Correct URL with query parameter
+      fetch(`http://localhost:8080/api/orders/${orderId}/status?status=${newStatus}`, {
+        method: 'PUT'
+      })
+        .then(res => {
+          if (!res.ok) throw new Error("Failed to update");
+          return res.json();
+        })
+        .then(data => {
+          alert(`✅ Status updated to ${newStatus}`);
+          loadFarmerOrders(); // refresh table to update badge
+        })
+        .catch(err => {
+          console.error(err);
+          alert("❌ Failed to update status. Check console.");
+        });
+    }
+
+
+    /* ================= LOGOUT ================= */
+
+    function logout() {
+      localStorage.removeItem("user");
+      window.location.href = "login.html";
+    }
+
+    /* ================= AUTO LOAD ================= */
+
+    loadFarmerOrders();
+  </script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - Complaints & Reviews</title>
+
+    <link rel="stylesheet" href="admin.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        .reviews-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-top: 20px;
+        }
+
+        .reviews-table th,
+        .reviews-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .reviews-table th {
+            background-color: #f8f9fa;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .rating-stars {
+            color: #ffc107;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-retailer {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .badge-farmer {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">
+            <i class="fa-solid fa-seedling"></i>
+            ROOTS
+        </div>
+
+        <nav class="menu">
+            <a href="admin-dashboard.html"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+            <a href="admin-users.html"><i class="fa-solid fa-users"></i> Manage Users</a>
+            <a href="./admin-products.html"><i class="fa-solid fa-box"></i> Products</a>
+            <a href="./admin-orders.html"><i class="fa-solid fa-receipt"></i> Orders</a>
+            <a href="#"><i class="fa-solid fa-money-bill-wave"></i> Payments</a>
+            <a href="#"><i class="fa-solid fa-chart-line"></i> Reports & Analytics</a>
+            <a href="admin-complaints.html"><i class="fa-solid fa-circle-exclamation"></i> Complaints</a>
+            <a href="admin-reviews.html" class="active"><i class="fa-solid fa-comment-dots"></i> Reviews</a>
+            <a href="#"><i class="fa-solid fa-bell"></i> Notifications</a>
+            <a href="#"><i class="fa-solid fa-user-circle"></i> Profile</a>
+            <a href="#"><i class="fa-solid fa-gear"></i> Settings</a>
+        </nav>
+
+        <button class="logout-btn" onclick="logout()">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="breadcrumb">
+                <h2>Complaints & Reviews</h2>
+                <p>ADMIN / Feedback</p>
+            </div>
+        </header>
+
+        <section class="page-title">
+            <h1>Platform Feedback</h1>
+            <p>View all ratings and comments from retailers about farmers</p>
+        </section>
+
+        <div class="table-container">
+            <table class="reviews-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Retailer</th>
+                        <th>Farmer</th>
+                        <th>Rating</th>
+                        <th>Comment</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="feedbackTableBody">
+                    <!-- Data will be injected here -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        function logout() {
+            localStorage.removeItem("user");
+            window.location.href = "login.html";
+        }
+
+        async function loadFeedback() {
+            const tbody = document.getElementById("feedbackTableBody");
+            tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Loading feedback...</td></tr>";
+
+            try {
+                const res = await fetch("http://localhost:8080/api/feedback/all");
+                const data = await res.json();
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center;'>No feedback found.</td></tr>";
+                    return;
+                }
+
+                tbody.innerHTML = "";
+                data.forEach(fb => {
+                    const row = document.createElement("tr");
+
+                    let stars = "";
+                    for (let i = 0; i < 5; i++) {
+                        stars += `<i class="fa-${i < fb.rating ? 'solid' : 'regular'} fa-star rating-stars"></i>`;
+                    }
+
+                    row.innerHTML = `
+            <td>#${fb.order ? fb.order.id : 'N/A'}</td>
+            <td><span class="status-badge badge-retailer">${fb.retailer ? fb.retailer.name : 'N/A'}</span></td>
+            <td><span class="status-badge badge-farmer">${fb.farmer ? fb.farmer.name : 'N/A'}</span></td>
+            <td>${stars}</td>
+            <td>${fb.comment || 'No comment'}</td>
+            <td>${fb.createdAt ? new Date(fb.createdAt).toLocaleDateString() : 'N/A'}</td>
+          `;
+                    tbody.appendChild(row);
+                });
+            } catch (err) {
+                console.error("Error loading feedback:", err);
+                tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; color:red;'>Failed to load feedback. Is the server running?</td></tr>";
+            }
+        }
+
+        loadFeedback();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Product | Farmer</title>
+
+  <link rel="stylesheet" href="farmer.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body>
+
+  <!-- ✅ Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <i class="fa-solid fa-seedling"></i>
+      <span>ROOTS</span>
+    </div>
+
+    <nav class="menu">
+      <a href="farmer-dashboard.html"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="add-product.html" class="active"><i class="fa-solid fa-plus"></i> Add Product</a>
+      <a href="inventory.html"><i class="fa-solid fa-warehouse"></i> Inventory</a>
+      <a href="farmer-orders.html"><i class="fa-solid fa-receipt"></i> Orders</a>
+      <a href="farmer-profile.html"><i class="fa-solid fa-user"></i> Profile</a>
+    </nav>
+
+    <button class="logout-btn" onclick="logout()">
+      <i class="fa-solid fa-right-from-bracket"></i> Logout
+    </button>
+  </aside>
+
+  <!-- ✅ Main -->
+  <main class="main">
+
+    <!-- ✅ Topbar -->
+    <header class="topbar">
+      <div class="breadcrumb">
+        <h2>Add Product</h2>
+        <p>FARMER / Add Product</p>
+      </div>
+
+      <div class="top-actions">
+        <span id="welcomeText">Welcome, Farmer</span>
+        <button class="top-btn"><i class="fa-solid fa-wallet"></i> Wallet</button>
+        <button class="top-btn"><i class="fa-regular fa-bell"></i> Notifications</button>
+      </div>
+    </header>
+
+    <!-- ✅ Title -->
+    <section class="page-title">
+      <h1>Add New Product</h1>
+      <p>List a new product for retailers to order</p>
+    </section>
+
+    <!-- ✅ Form Card -->
+    <section class="content-card">
+      <h2 style="margin-bottom:12px;">Product Details</h2>
+
+      <div class="form-grid">
+        <div class="input-box">
+          <label>Product Name</label>
+          <input id="pname" placeholder="Eg: Tomato" />
+        </div>
+
+        <div class="input-box">
+          <label>Price (₹)</label>
+          <input id="price" type="number" placeholder="Eg: 30" />
+        </div>
+
+        <div class="input-box">
+          <label>Quantity</label>
+          <input id="quantity" type="number" placeholder="Eg: 20" />
+        </div>
+        <div class="input-box">
+          <label>Category</label>
+          <select id="category">
+            <option value="">Select Category</option>
+            <option value="Vegetables">Vegetables</option>
+            <option value="Fruits">Fruits</option>
+            <option value="Grains">Grains</option>
+            <option value="Pulses">Pulses</option>
+            <option value="Spices">Spices</option>
+          </select>
+        </div>
+
+
+        <div class="input-box">
+          <label>Upload Image</label>
+          <input type="file" id="image" />
+        </div>
+      </div>
+
+      <button class="primary-btn" onclick="addProduct()">
+        <i class="fa-solid fa-plus"></i> Add Product
+      </button>
+
+      <p id="msg" style="margin-top:10px;"></p>
+    </section>
+
+  </main>
+
+  <script>
+    /* ================= AUTH ================= */
+    const userStr = localStorage.getItem("user");  // ✅ FIX: Don't JSON.parse here
+
+    if (!userStr) {
+      alert("Please login");
+      window.location.href = "login.html";
+    }
+
+    const user = JSON.parse(userStr); // ✅ FIX: Parse ONLY once
+
+    if (!String(user.role || "").toUpperCase().includes("FARMER")) {
+      alert("Farmer access only");
+      window.location.href = "login.html";
+    }
+
+    document.getElementById("welcomeText").innerText = "Welcome, Farmer";
+
+    /* ================= LOGOUT ================= */
+    function logout() {
+      localStorage.removeItem("user");
+      window.location.href = "login.html";
+    }
+
+    /* ================= ADD PRODUCT ================= */
+    async function addProduct() {
+      const name = document.getElementById("pname").value.trim();
+      const price = document.getElementById("price").value.trim();
+      const quantity = document.getElementById("quantity").value.trim();
+      const category = document.getElementById("category").value.trim();
+      const imageFile = document.getElementById("image").files[0];
+
+      const msg = document.getElementById("msg");
+
+      if (!name || !category || !price || !quantity || !imageFile) {
+        msg.style.color = "red";
+        msg.innerText = "⚠ Please fill all fields and upload image!";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("farmerId", user.id);
+      formData.append("name", name);
+      formData.append("price", price);
+      formData.append("quantity", quantity);
+      formData.append("category", category);
+      formData.append("image", imageFile);
+
+      try {
+        const res = await fetch("http://localhost:8080/api/products/add", {
+          method: "POST",
+          body: formData
+        });
+
+        if (res.ok) {
+          msg.style.color = "green";
+          msg.innerText = "✅ Product added successfully!";
+          clearForm();
+
+          setTimeout(() => {
+            window.location.href = "inventory.html";
+          }, 1000);
+        } else {
+          // ✅ Parse error JSON
+          const errorData = await res.json();
+          msg.style.color = "red";
+          msg.innerText = "❌ " + (errorData.message || "Failed to add product");
+
+          if (errorData.message && errorData.message.includes("VERIFIED")) {
+            alert("Action Denied! You must be VERIFIED to add products.\nRedirecting to Verification Page...");
+            window.location.href = "verify-farmer.html";
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        msg.style.color = "red";
+        msg.innerText = "❌ Server error while adding product";
+      }
+    }
+
+    function clearForm() {
+      document.getElementById("pname").value = "";
+      document.getElementById("price").value = "";
+      document.getElementById("quantity").value = "";
+      document.getElementById("image").value = "";
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Order Details</title>
+  <link rel="stylesheet" href="./order-details.css">
+</head>
+
+<body>
+
+  <h2>Order Details</h2>
+  <div id="items" class="items-container"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("orderId");
+
+    if (!orderId) {
+      document.getElementById("items").innerHTML = "<p>Invalid Order</p>";
+    } else {
+      fetch(`http://localhost:8080/api/orders/${orderId}/items`)
+        .then(res => res.json())
+        .then(items => {
+          const container = document.getElementById("items");
+          container.innerHTML = "";
+
+          // Display Tracking if available (from the first item's order object)
+          const firstItem = items[0];
+          if (firstItem && firstItem.order && firstItem.order.trackingNumber) {
+            container.innerHTML += `
+              <div style="background:#e0f2fe; padding:15px; border-radius:10px; margin-bottom:20px; border:1px solid #bae6fd; color:#0369a1;">
+                <h3 style="margin:0 0 5px 0;"><i class="fa fa-truck-fast"></i> Tracking Details</h3>
+                <p style="margin:0;"><b>Carrier:</b> ${firstItem.order.trackingCompany}</p>
+                <p style="margin:0;"><b>Number:</b> ${firstItem.order.trackingNumber}</p>
+              </div>
+            `;
+          }
+
+          items.forEach(item => {
+            const imageUrl = item.product?.imageUrl
+              ? `http://localhost:8080/${item.product.imageUrl}`
+              : "https://placehold.co/400x400?text=ROOTS";
+
+            container.innerHTML += `
+          <div class="item-card">
+            <img src="${imageUrl}" alt="${item.product?.name}" />
+            <div class="item-info">
+              <h3>${item.product?.name}</h3>
+              <p>Quantity: ${item.quantity} kg</p>
+              <p>Price: ₹${item.price}</p>
+              <p><strong>Total: ₹${item.quantity * item.price}</strong></p>
+            </div>
+          </div>
+        `;
+          });
+        })
+        .catch(() => {
+          document.getElementById("items").innerHTML =
+            "<p>Failed to load order items</p>";
+        });
+    }
+  </script>
+
+</body>
+
+</html>

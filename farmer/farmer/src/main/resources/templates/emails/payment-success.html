@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0fdf4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .card {
+            max-width: 550px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            border: 1px solid #d1fae5;
+        }
+
+        .icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #059669;
+        }
+
+        .details {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+            text-align: left;
+        }
+
+        .details p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .footer {
+            font-size: 12px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="icon">✅</div>
+        <h1>Payment Successful!</h1>
+        <p>Hi <span th:text="${order.retailer.name}">User</span>, your payment for Order #<span
+                th:text="${order.id}">123</span> has been successfully processed.</p>
+
+        <div class="details">
+            <p><strong>Transaction ID:</strong> <span th:text="${order.paymentId}">razorpay_123</span></p>
+            <p><strong>Amount Paid:</strong> ₹<span th:text="${order.totalAmount}">1000</span></p>
+            <p><strong>Date:</strong> <span
+                    th:text="${#temporals.format(T(java.time.LocalDateTime).now(), 'dd-MM-yyyy HH:mm')}">Date</span></p>
+        </div>
+
+        <p>We have attached your official <strong>Invoice PDF</strong> to this email for your records.</p>
+
+        <hr style="border:0; border-top:1px solid #eee; margin:30px 0;">
+        <p class="footer">Thank you for your business!<br>ROOTS AgriTrade Platform</p>
+    </div>
+</body>
+
+</html>

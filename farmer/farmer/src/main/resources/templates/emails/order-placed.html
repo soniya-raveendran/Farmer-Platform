@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f4f7f6;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        .header {
+            border-bottom: 2px solid #10b981;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #10b981;
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .order-info {
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th {
+            text-align: left;
+            border-bottom: 2px solid #eee;
+            padding: 10px 0;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        .total {
+            text-align: right;
+            font-size: 18px;
+            font-weight: bold;
+            padding-top: 15px;
+            color: #10b981;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Order Confirmed!</h1>
+        </div>
+        <div class="order-info">
+            <p>Dear <strong th:text="${order.retailer.name}">Retailer</strong>,</p>
+            <p>Thank you for your order! We've received your request and it's being processed.</p>
+            <p><strong>Order ID:</strong> #<span th:text="${order.id}">123</span></p>
+            <p><strong>Status:</strong> <span style="color:orange;">PLACED</span></p>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="item : ${order.items}">
+                    <td th:text="${item.product.name}">Product</td>
+                    <td th:text="${item.quantity + ' kg'}">1 kg</td>
+                    <td th:text="${'₹' + item.price}">₹100</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="total">
+            Total Amount: ₹<span th:text="${order.totalAmount}">0</span>
+        </div>
+        <p style="margin-top:25px; font-size:12px; color:#777;">You will receive another email with the invoice once the
+            payment is verified.</p>
+    </div>
+</body>
+
+</html>

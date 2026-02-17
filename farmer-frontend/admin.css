@@ -1,0 +1,287 @@
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body{
+  background:#f4f6f8;
+  display:flex;
+  color:#111827;
+}
+
+/* Sidebar */
+.sidebar{
+  width:260px;
+  height:100vh;
+  background:#fff;
+  border-right:1px solid #e5e7eb;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:16px;
+  font-weight:800;
+  color:#0f7d44;
+  margin-bottom:18px;
+}
+
+.menu a{
+  text-decoration:none;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:11px 12px;
+  border-radius:10px;
+  color:#374151;
+  margin-bottom:6px;
+  transition:0.2s;
+}
+
+.menu a:hover{
+  background:#f0fdf4;
+  color:#0f7d44;
+}
+
+.menu a.active{
+  background:#eafaf1;
+  color:#0f7d44;
+  font-weight:700;
+  border-left:4px solid #0f7d44;
+}
+
+/* Logout */
+.logout-btn{
+  margin-top:auto;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #fecaca;
+  background:white;
+  color:#dc2626;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.logout-btn:hover{
+  background:#fef2f2;
+}
+
+/* Main */
+.main{
+  flex:1;
+  padding:18px 26px;
+}
+
+/* Topbar */
+.topbar{
+  background:#fff;
+  padding:16px 18px;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.breadcrumb h2{
+  font-size:18px;
+  font-weight:800;
+}
+
+.breadcrumb p{
+  font-size:12px;
+  color:#6b7280;
+  margin-top:4px;
+}
+
+.top-actions{
+  display:flex;
+  gap:10px;
+}
+
+.top-btn{
+  border:1px solid #e5e7eb;
+  background:#fff;
+  border-radius:10px;
+  padding:8px 12px;
+  cursor:pointer;
+}
+
+.top-btn:hover{
+  background:#f9fafb;
+}
+
+/* Title */
+.page-title{
+  margin:20px 0;
+}
+.page-title h1{
+  font-size:28px;
+  font-weight:900;
+}
+.page-title p{
+  color:#6b7280;
+  margin-top:6px;
+}
+
+/* Cards */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:16px;
+}
+
+.stat-card{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:18px;
+  display:flex;
+  gap:14px;
+  align-items:center;
+  box-shadow:0 4px 14px rgba(0,0,0,0.05);
+}
+
+.stat-icon{
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+}
+
+.icon-blue{ background:#eff6ff; color:#2563eb; }
+.icon-green{ background:#eafaf1; color:#0f7d44; }
+.icon-orange{ background:#fff7ed; color:#ea580c; }
+.icon-purple{ background:#f5f3ff; color:#7c3aed; }
+
+.stat-card h3{
+  font-size:22px;
+  font-weight:900;
+}
+.stat-card p{
+  font-size:12px;
+  color:#6b7280;
+  margin-top:3px;
+}
+
+/* Quick Cards */
+.quick{
+  margin-top:16px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:16px;
+}
+
+.quick-card{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:18px;
+  display:flex;
+  gap:14px;
+  align-items:center;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.quick-card:hover{
+  transform:translateY(-2px);
+}
+
+.quick-card h4{
+  font-size:16px;
+  font-weight:900;
+}
+
+.quick-card p{
+  color:#6b7280;
+  font-size:13px;
+  margin-top:4px;
+}
+
+/* Table */
+.table-card{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:14px;
+  padding:18px;
+}
+
+.table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:12px;
+}
+
+.table th, .table td{
+  padding:12px;
+  border-bottom:1px solid #eef2f5;
+  text-align:left;
+  font-size:14px;
+}
+
+.table th{
+  font-size:12px;
+  text-transform:uppercase;
+  color:#6b7280;
+}
+
+.badge{
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  display:inline-block;
+}
+
+.badge.farmer{ background:#eafaf1; color:#0f7d44; }
+.badge.retailer{ background:#fff7ed; color:#ea580c; }
+.badge.admin{ background:#fee2e2; color:#dc2626; }
+.badge.active{ background:#dcfce7; color:#16a34a; }
+/* ✅ Admin input better */
+input::placeholder {
+  color: #9ca3af;
+}
+select{
+  width:100%;
+  padding:10px;
+  border:1px solid #ccc;
+  border-radius:8px;
+  outline:none;
+}
+/* ===============================
+   FIXED SIDEBAR (ADMIN + FARMER)
+================================ */
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 260px;
+  overflow-y: auto;
+  z-index: 1000;
+  background: #ffffff;
+  border-right: 1px solid #eaeaea;
+}
+
+/* Main content moves beside sidebar */
+.main {
+  margin-left: 260px;
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+/* Prevent body horizontal scroll */
+body {
+  overflow-x: hidden;
+}

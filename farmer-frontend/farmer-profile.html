@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile</title>
+
+  <link rel="stylesheet" href="farmer.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body>
+
+  <aside class="sidebar">
+    <div class="logo"><i class="fa-solid fa-seedling"></i>ROOTS</div>
+
+    <nav class="menu">
+      <a href="farmer-dashboard.html"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+      <a href="farmer-orders.html"><i class="fa-solid fa-receipt"></i> Orders</a>
+      <a href="inventory.html"><i class="fa-solid fa-warehouse"></i> Inventory</a>
+      <a href="farmer-reviews.html"><i class="fa-solid fa-star"></i> Ratings & Reviews</a>
+      <a href="farmer-profile.html" class="active"><i class="fa-solid fa-user"></i> Profile</a>
+    </nav>
+
+    <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="breadcrumb">
+        <h2>Profile</h2>
+        <p>FARMER / Profile</p>
+      </div>
+
+      <div class="top-actions">
+        <span>Welcome, Farmer</span>
+        <button class="top-btn"><i class="fa-solid fa-wallet"></i> Wallet</button>
+        <button class="top-btn"><i class="fa-regular fa-bell"></i> Notifications</button>
+      </div>
+    </header>
+
+    <section class="page-title">
+      <h1>My Profile</h1>
+      <p>View and update your account details</p>
+    </section>
+
+    <section class="content-card">
+      <h2 style="margin-bottom:6px;">My Profile</h2>
+      <p style="color:#6b7280; font-size:14px; margin-bottom:16px;">
+        View and update your account details
+      </p>
+
+      <div class="form-grid">
+        <div class="input-box">
+          <label>Full Name</label>
+          <input type="text" id="nameInput" placeholder="Enter name" />
+        </div>
+
+        <div class="input-box">
+          <label>Email Address</label>
+          <input type="email" id="emailInput" placeholder="Enter email" />
+        </div>
+
+        <div class="input-box">
+          <label>Phone Number</label>
+          <input type="text" id="phoneInput" placeholder="Enter phone number" />
+        </div>
+
+        <div class="input-box">
+          <label>Account Type</label>
+          <input type="text" id="roleInput" disabled />
+        </div>
+      </div>
+
+      <button class="primary-btn" onclick="saveProfile()">
+        <i class="fa-solid fa-floppy-disk"></i> Save Changes
+      </button>
+
+      <button class="secondary-btn"
+        style="margin-top: 10px; background-color: #eab308; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%;"
+        onclick="window.location.href='verify-farmer.html'">
+        <i class="fa-solid fa-id-card"></i> Verify Account
+      </button>
+
+      <p id="msg" style="margin-top:10px; font-weight:600;"></p>
+    </section>
+
+  </main>
+
+  <script>
+    function logout() {
+      localStorage.removeItem("user");
+      window.location.href = "login.html";
+    }
+
+    // ✅ Load user from localStorage
+    const userStr = localStorage.getItem("user");
+
+    if (!userStr) {
+      alert("Please login first");
+      window.location.href = "login.html";
+    }
+
+    const user = JSON.parse(userStr);
+
+    // ✅ Only Farmer access
+    if (!String(user.role || "").toUpperCase().includes("FARMER")) {
+      alert("Farmer access only");
+      window.location.href = "login.html";
+    }
+
+    // ✅ Fill values in inputs
+    document.getElementById("nameInput").value = user.name || "";
+    document.getElementById("emailInput").value = user.email || "";
+    document.getElementById("phoneInput").value = user.phone || "";
+    document.getElementById("roleInput").value = user.role || "FARMER";
+    async function saveProfile() {
+      const name = document.getElementById("nameInput").value.trim();
+      const email = document.getElementById("emailInput").value.trim();
+      const phone = document.getElementById("phoneInput").value.trim();
+      const address = document.getElementById("addressInput").value.trim();
+
+      const msg = document.getElementById("msg");
+
+      if (!name || !email || !phone || !address) {
+        msg.style.color = "red";
+        msg.innerText = "⚠ Please fill all fields!";
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://localhost:8080/api/users/update/${user.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, phone, address })
+        });
+
+        if (res.ok) {
+          const updatedUser = await res.json();
+
+          // ✅ update localStorage too
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+
+          msg.style.color = "green";
+          msg.innerText = "✅ Profile updated & saved in database!";
+        } else {
+          const errText = await res.text();
+          msg.style.color = "red";
+          msg.innerText = "❌ Update failed: " + errText;
+        }
+      } catch (err) {
+        console.error(err);
+        msg.style.color = "red";
+        msg.innerText = "❌ Server error while updating profile";
+      }
+    }
+
+
+  </script>
+
+
+</body>
+
+</html>
